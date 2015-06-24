@@ -104,9 +104,10 @@ impl Client {
         println!("Unauthorised PUT");
 
         {
+            let payload = maidsafe_types::Payload::new(maidsafe_types::PayloadTypeTag::PublicMaid, &public_maid);
             let destination = client.account.get_public_maid().name();
-            let boxed_public_maid = Box::new(client.account.get_public_maid().clone());
-            let _ = client.routing.lock().unwrap().unauthorised_put(destination, boxed_public_maid);
+            let boxed_payload = Box::new(payload);
+            let _ = client.routing.lock().unwrap().unauthorised_put(destination, boxed_payload);
         }
 
         println!("Unauthorised PUT done.");
@@ -115,8 +116,8 @@ impl Client {
 
         println!("Session Packet Immutable Data PUT");
 
-        let put_res = client.routing.lock().unwrap().put(encrypted_account.clone());
-
+        let payload = maidsafe_types::Payload::new(maidsafe_types::PayloadTypeTag::ImmutableData, &encrypted_account);
+        let put_res = client.routing.lock().unwrap().put(payload);
 
         match put_res {
             Ok(id) => {
@@ -129,7 +130,8 @@ impl Client {
                                                                                    client.account.get_public_maid().name(),
                                                                                    vec![encrypted_account.name()]);
 
-                        let put_res = client.routing.lock().unwrap().put(account_versions);
+                        let payload = maidsafe_types::Payload::new(maidsafe_types::PayloadTypeTag::StructuredData, &account_versions);
+                        let put_res = client.routing.lock().unwrap().put(payload);
 
                         match put_res {
                             Ok(id) => {
