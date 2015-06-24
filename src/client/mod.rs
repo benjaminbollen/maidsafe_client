@@ -101,19 +101,30 @@ impl Client {
             })),
         };
 
+        println!("Unauthorised PUT");
+
         {
             let destination = client.account.get_public_maid().name();
             let boxed_public_maid = Box::new(client.account.get_public_maid().clone());
             let _ = client.routing.lock().unwrap().unauthorised_put(destination, boxed_public_maid);
         }
 
+        println!("Unauthorised PUT done.");
+
         let encrypted_account = maidsafe_types::ImmutableData::new(client.account.encrypt(password, pin).ok().unwrap());
+
+        println!("Session Packet Immutable Data PUT");
+
         let put_res = client.routing.lock().unwrap().put(encrypted_account.clone());
+
+
         match put_res {
             Ok(id) => {
+                println!("Session Packet Immutable Data PUT successful to routing. Waiting Network Response.");
                 let mut response_getter = response_getter::ResponseGetter::new(client.response_notifier.clone(), client.callback_interface.clone(), Some(id), None);
                 match response_getter.get() {
                     Ok(_) => {
+                        println!("Session Packet Immutable Data PUT successful to network.");
                         let account_versions = maidsafe_types::StructuredData::new(client.session_packet_id.clone(),
                                                                                    client.account.get_public_maid().name(),
                                                                                    vec![encrypted_account.name()]);
@@ -131,10 +142,16 @@ impl Client {
                             Err(io_error) => Err(io_error),
                         }
                     },
-                    Err(_) => Err(::IoError::new(::std::io::ErrorKind::Other, "Session-Packet PUT-Response Failure !!")),
+                    Err(_) => {
+                        println!("Session Packet Immutable Data PUT unsuccessful to network.");
+                        Err(::IoError::new(::std::io::ErrorKind::Other, "Session-Packet PUT-Response Failure !!"))
+                    },
                 }
             },
-            Err(io_error) => Err(io_error),
+            Err(io_error) => {
+                println!("Session Packet Immutable Data PUT unsuccessful to routing.");
+                Err(io_error)
+            },
         }
     }
 
