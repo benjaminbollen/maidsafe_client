@@ -207,7 +207,8 @@ impl Client {
                 match response_getter.get() {
                     Ok(raw_data) => {
                         let mut decoder = cbor::Decoder::from_bytes(raw_data);
-                        let account_versions: maidsafe_types::StructuredData = decoder.decode().next().unwrap().unwrap();
+                        let account_versions_payload: maidsafe_types::Payload = decoder.decode().next().unwrap().unwrap();
+                        let account_versions: maidsafe_types::StructuredData = account_versions_payload.get_data();
 
                         match account_versions.value().pop() {
                             Some(latest_version) => {
@@ -219,7 +220,8 @@ impl Client {
                                         match response_getter.get() {
                                             Ok(raw_data) => {
                                                 let mut decoder = cbor::Decoder::from_bytes(raw_data);
-                                                let encrypted_account_packet: maidsafe_types::ImmutableData = decoder.decode().next().unwrap().unwrap();
+                                                let encrypted_account_packet_payload: maidsafe_types::Payload = decoder.decode().next().unwrap().unwrap();
+                                                let encrypted_account_packet: maidsafe_types::ImmutableData = encrypted_account_packet_payload.get_data();
 
                                                 let decryption_result = user_account::Account::decrypt(&encrypted_account_packet.value()[..], password, pin);
                                                 if decryption_result.is_err() {
