@@ -104,7 +104,7 @@ impl Client {
         println!("Unauthorised PUT");
 
         {
-            let payload = maidsafe_types::Payload::new(maidsafe_types::PayloadTypeTag::PublicMaid, &public_maid);
+            let payload = maidsafe_types::Payload::new(maidsafe_types::PayloadTypeTag::PublicMaid, client.account.get_public_maid());
             let destination = client.account.get_public_maid().name();
             let boxed_payload = Box::new(payload);
             let _ = client.routing.lock().unwrap().unauthorised_put(destination, boxed_payload);
@@ -199,13 +199,16 @@ impl Client {
         };
 
         let structured_data_type_id = maidsafe_types::data::StructuredDataTypeTag;
+        println!("GET Account Version");
         let get_result = fake_routing_client.lock().unwrap().get(structured_data_type_id.type_tag(), user_network_id);
 
         match get_result {
             Ok(id) => {
+                println!("GET Account Version successful from Routing. Waiting For Network.");
                 let mut response_getter = response_getter::ResponseGetter::new(notifier.clone(), callback_interface.clone(), Some(id), None);
                 match response_getter.get() {
                     Ok(raw_data) => {
+                        println!("GET Account Version successful from Network.");
                         let mut decoder = cbor::Decoder::from_bytes(raw_data);
                         let account_versions_payload: maidsafe_types::Payload = decoder.decode().next().unwrap().unwrap();
                         let account_versions: maidsafe_types::StructuredData = account_versions_payload.get_data();
