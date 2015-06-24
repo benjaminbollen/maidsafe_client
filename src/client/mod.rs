@@ -120,11 +120,11 @@ impl Client {
         let put_res = client.routing.lock().unwrap().put(payload);
 
         match put_res {
-            Ok(id) => {
+            Ok(_) => {
                 println!("Session Packet Immutable Data PUT successful to routing. Waiting Network Response.");
-                let mut response_getter = response_getter::ResponseGetter::new(client.response_notifier.clone(), client.callback_interface.clone(), Some(id), None);
-                match response_getter.get() {
-                    Ok(_) => {
+                // let mut response_getter = response_getter::ResponseGetter::new(client.response_notifier.clone(), client.callback_interface.clone(), Some(id), None);
+                // match response_getter.get() {
+                //     Ok(_) => {
                         println!("Session Packet Immutable Data PUT successful to network.");
                         let account_versions = maidsafe_types::StructuredData::new(client.session_packet_id.clone(),
                                                                                    client.account.get_public_maid().name(),
@@ -134,21 +134,21 @@ impl Client {
                         let put_res = client.routing.lock().unwrap().put(payload);
 
                         match put_res {
-                            Ok(id) => {
-                                let mut response_getter = response_getter::ResponseGetter::new(client.response_notifier.clone(), client.callback_interface.clone(), Some(id), None);
-                                match response_getter.get() {
-                                    Ok(_) => Ok(client),
-                                    Err(_) => Err(::IoError::new(::std::io::ErrorKind::Other, "Version-Packet PUT-Response Failure !!")),
-                                }
+                            Ok(_) => {
+                                // let mut response_getter = response_getter::ResponseGetter::new(client.response_notifier.clone(), client.callback_interface.clone(), Some(id), None);
+                                // match response_getter.get() {
+                                    /*Ok(_) =>*/ Ok(client)
+                                //     Err(_) => Err(::IoError::new(::std::io::ErrorKind::Other, "Version-Packet PUT-Response Failure !!")),
+                                // }
                             },
                             Err(io_error) => Err(io_error),
                         }
-                    },
-                    Err(_) => {
-                        println!("Session Packet Immutable Data PUT unsuccessful to network.");
-                        Err(::IoError::new(::std::io::ErrorKind::Other, "Session-Packet PUT-Response Failure !!"))
-                    },
-                }
+                //    },
+                //    Err(_) => {
+                //        println!("Session Packet Immutable Data PUT unsuccessful to network.");
+                //        Err(::IoError::new(::std::io::ErrorKind::Other, "Session-Packet PUT-Response Failure !!"))
+                //    },
+                // }
             },
             Err(io_error) => {
                 println!("Session Packet Immutable Data PUT unsuccessful to routing.");
